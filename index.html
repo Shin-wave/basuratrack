@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BasuraTrack Surigao</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f4f7f4;--card:#fff;--tx:#16231a;--mu:#5a6b5f;--pr:#1c8748;--pr2:#e2f3e8;--bd:#dde5de;--wa:#b8730c}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1712;--card:#18231b;--tx:#e8f1ea;--mu:#9bb0a0;--pr:#3fb56f;--pr2:#1d3a29;--bd:#2a3a2f;--wa:#e0a040}}
+:root[data-theme="dark"]{--bg:#0f1712;--card:#18231b;--tx:#e8f1ea;--mu:#9bb0a0;--pr:#3fb56f;--pr2:#1d3a29;--bd:#2a3a2f;--wa:#e0a040}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{padding:14px 16px 6px;max-width:760px;margin:auto}h1{margin:0;font-size:20px}h1 span{color:var(--pr)}.sub{color:var(--mu);font-size:13px}
+nav{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:760px;margin:auto;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5}
+nav button{flex:none;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:7px 12px;border-radius:99px;font-size:13px;cursor:pointer}
+nav button.on{background:var(--pr);color:#fff;border-color:var(--pr)}
+main{max-width:760px;margin:auto;padding:8px 16px 40px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}label{display:block;font-size:12px;color:var(--mu);margin:8px 0 3px}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:9px;background:var(--bg);color:var(--tx);font:inherit}
+.btn{background:var(--pr);color:#fff;border:0;padding:10px 14px;border-radius:9px;font:inherit;cursor:pointer;margin-top:10px}.btn.s{padding:6px 10px;margin:0;font-size:13px}.btn.g{background:var(--pr2);color:var(--pr)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}.stat{background:var(--pr2);border-radius:12px;padding:10px}.stat b{display:block;font-size:22px;color:var(--pr)}.stat small{color:var(--mu)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--bd)}.row:first-of-type{border-top:0}
+.tag{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--pr2);color:var(--pr)}.tag.w{background:#fbeed8;color:var(--wa)}
+.bar{height:10px;background:var(--pr);border-radius:5px;min-width:2px}.bl{display:grid;grid-template-columns:110px 1fr 50px;gap:8px;align-items:center;font-size:13px;margin:5px 0}
+.chat{height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:4px}.m{max-width:82%;padding:8px 11px;border-radius:14px;white-space:pre-wrap}.m.u{align-self:flex-end;background:var(--pr);color:#fff}.m.b{align-self:flex-start;background:var(--pr2)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#16231a;color:#fff;padding:10px 16px;border-radius:99px;font-size:13px;z-index:9}
+.mu{color:var(--mu);font-size:12px}.qk{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+</style></head><body>
+<header><h1>Basura<span>Track</span> Surigao</h1><div class="sub">Segregate. Schedule pickup. Earn rewards. Surigao City, Surigao del Norte</div></header>
+<nav id="nav"></nav><main id="app"></main>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const BR=['Alang-alang','Aurora','Cagniog','Canlanipa','Day-asan','Ipil','Lipata','Luna','Mabini','Mat-i','Punta Bilar','Quezon','Rizal','Sabang','San Juan','Sukailang','Taft','Washington','Zaragoza'];
+const T={bio:'Biodegradable',rec:'Recyclable',res:'Residual'},PT={bio:2,rec:5,res:1};
+const RATE={'Plastic bottles (PET)':10,'Cardboard / paper':3,'Aluminum cans':60,'Glass bottles':1,'Scrap metal':12};
+const PARTNERS=[['Sample Café: 10% off one drink',50],['Sample Store: ₱20 grocery discount',100],['Sample Eatery: free iced tea',30],['Tree-planting slot (LGU/NGO drive)',80]];
+const GUIDE=[['Plastic bottle (empty, rinsed)','rec'],['Cardboard box','rec'],['Newspaper / paper','rec'],['Aluminum can','rec'],['Glass bottle','rec'],['Food scraps','bio'],['Fruit peels','bio'],['Fish bones','bio'],['Dried leaves / yard waste','bio'],['Used tissue','res'],['Candy wrapper / sachet','res'],['Styrofoam','res'],['Diaper / sanitary pads','res'],['Broken ceramics','res']];
+const TIPS=['Rinse bottles and cans before storing them.','Keep food scraps separate: they can become compost.','Flatten cardboard to save space.','Sachets and wrappers go to residual unless a local junk shop buys them.'];
+const KEY='basuratrack-sc-v1';let S,tab='home',bot={step:null,d:{},lang:'en'};
+function seed(){const logs=[],reqs=[];let x=7;const r=()=>(x=(x*9301+49297)%233280)/233280;
+for(let i=0;i<24;i++){const t=['bio','rec','res'][Math.floor(r()*3)],kg=+(1+r()*9).toFixed(1);logs.push({id:i,date:'2026-09-'+String(1+Math.floor(r()*28)).padStart(2,'0'),type:t,sub:t=='rec'?'Plastic bottles (PET)':'',kg,pts:0,brgy:BR[Math.floor(r()*BR.length)],demo:1})}
+for(let i=0;i<5;i++)reqs.push({id:100+i,brgy:BR[i*3],addr:'Demo address '+(i+1),name:'Demo user '+(i+1),types:['rec','bio'],kg:5+i,when:'This week',status:i<2?'Collected':'Pending',actual:i<2?5+i:0,demo:1});
+return{logs,reqs,spent:0,me:{name:'',brgy:'Washington'},next:200}}
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}if(!S)S=seed();
+if(!S.cols)S.cols=[{id:1,name:'Demo Hauler A',type:'Independent hauler',plate:'ABC 123',brgys:['Washington','Taft','Luna'],cap:500,status:'Approved'},{id:2,name:'Demo Junk Shop B',type:'Junk shop',plate:'XYZ 456',brgys:['Lipata','Mat-i','Sabang'],cap:300,status:'Approved'},{id:3,name:'Demo Hauler C',type:'Independent hauler',plate:'PEN 789',brgys:['Rizal','Quezon'],cap:400,status:'Pending'}];
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const mine=()=>S.logs.filter(l=>!l.demo),pts=()=>mine().reduce((a,l)=>a+l.pts,0)-S.spent;
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}
+const opts=(a,sel)=>a.map(b=>`<option${b==sel?' selected':''}>${esc(b)}</option>`).join('');
+function addLog(type,sub,kg,brgy){kg=+kg;if(!(kg>0))return toast('Enter weight in kg');const p=Math.round(kg*PT[type]);S.logs.push({id:S.next++,date:new Date().toISOString().slice(0,10),type,sub,kg,pts:p,brgy});save();toast('+'+p+' points');return p}
+function addReq(o){S.reqs.push({id:S.next++,status:'Pending',actual:0,...o});save()}
+const V={
+home(){const m=mine(),tot=t=>m.filter(l=>l.type==t).reduce((a,l)=>a+l.kg,0).toFixed(1);
+return`<div class="card"><h2>Welcome${S.me.name?', '+esc(S.me.name):''}!</h2><div class="grid"><div class="stat"><b>${pts()}</b><small>points</small></div><div class="stat"><b>${tot('rec')}</b><small>kg recyclable</small></div><div class="stat"><b>${tot('bio')}</b><small>kg biodegradable</small></div><div class="stat"><b>${tot('res')}</b><small>kg residual</small></div></div>
+<label>Your name</label><input id="nm" value="${esc(S.me.name)}"><label>Your barangay</label><select id="mb">${opts(BR,S.me.brgy)}</select><button class="btn" onclick="S.me={name:$('#nm').value.slice(0,40),brgy:$('#mb').value};save();toast('Saved');go('home')">Save profile</button></div>
+<div class="card"><h2>Tip of the day</h2>${esc(TIPS[new Date().getDate()%TIPS.length])}</div>
+<div class="card"><h2>Recent logs</h2>${m.slice(-5).reverse().map(l=>`<div class="row"><span>${T[l.type]} ${esc(l.sub)} · ${l.kg} kg</span><span class="tag">+${l.pts}</span></div>`).join('')||'<span class="mu">No logs yet. Add your first one under Log.</span>'}</div>`},
+log(){return`<div class="card"><h2>Log your segregated waste</h2><label>Type</label><select id="lt" onchange="$('#ls').style.display=this.value=='rec'?'block':'none'">${Object.keys(T).map(k=>`<option value="${k}">${T[k]}</option>`).join('')}</select>
+<div id="ls" style="display:none"><label>Material</label><select>${opts(Object.keys(RATE))}</select></div><label>Weight (kg)</label><input id="lk" type="number" min="0" step="0.1" inputmode="decimal"><button class="btn" onclick="const t=$('#lt').value;if(addLog(t,t=='rec'?$('#ls select').value:'',$('#lk').value,S.me.brgy))go('log')">Add log</button>
+<p class="mu">Points per kg: Recyclable 5 · Biodegradable 2 · Residual 1. Logs are self-reported and get verified when the collector weighs them.</p></div>
+<div class="card"><h2>Estimated junk-shop value</h2><p class="mu">Sample rates only. Confirm real prices with your local junk shop.</p>${Object.entries(RATE).map(([k,v])=>`<div class="row"><span>${k}</span><b>₱${v}/kg</b></div>`).join('')}</div>`},
+pickup(){const mr=S.reqs.filter(r=>!r.demo).reverse();return`<div class="card"><h2>Request a pickup</h2><label>Barangay</label><select id="pb">${opts(BR,S.me.brgy)}</select><label>Address / landmark</label><input id="pa"><label>Your name / contact</label><input id="pn" value="${esc(S.me.name)}"><label>Waste types</label><div class="qk">${Object.keys(T).map(k=>`<label style="display:flex;gap:4px;align-items:center;margin:0"><input type="checkbox" class="pt" value="${k}" style="width:auto" checked>${T[k]}</label>`).join('')}</div><label>Estimated kg</label><input id="pk" type="number" min="1" value="5"><label>Preferred time</label><input id="pw" placeholder="e.g. Saturday morning">
+<button class="btn" onclick="const ty=[...document.querySelectorAll('.pt:checked')].map(x=>x.value);if(!$('#pa').value||!ty.length)return toast('Add address and type');addReq({brgy:$('#pb').value,addr:$('#pa').value.slice(0,120),name:$('#pn').value.slice(0,60),types:ty,kg:+$('#pk').value||1,when:$('#pw').value.slice(0,60)});toast('Request sent');go('pickup')">Send request</button></div>
+<div class="card"><h2>My requests</h2>${mr.map(r=>`<div class="row"><span>${esc(r.brgy)}: ${esc(r.addr)}<br><span class="mu">${r.types.map(t=>T[t]).join(', ')} · ~${r.kg} kg</span></span><span class="tag ${r.status=='Pending'?'w':''}">${r.status}</span></div>`).join('')||'<span class="mu">No requests yet.</span>'}</div>`},
+rewards(){return`<div class="card"><h2>Rewards <span class="tag">${pts()} pts</span></h2><p class="mu">Sample partners shown. Real partners would sign up as sponsors. Points are a private loyalty program with no cash value.</p>${PARTNERS.map((p,i)=>`<div class="row"><span>${p[0]}<br><span class="mu">${p[1]} pts</span></span><button class="btn s" onclick="if(pts()<${p[1]})return toast('Not enough points');S.spent+=${p[1]};save();toast('Redeemed! Show this screen to the partner');go('rewards')">Redeem</button></div>`).join('')}</div>`},
+guide(){return`<div class="card"><h2>Where does it go?</h2><input id="gq" placeholder="Search: bottle, peel, sachet..." oninput="gf()"><div id="gl"></div></div>`},
+bot(){return`<div class="card"><h2>Messenger bot demo</h2><p class="mu">Simulates the Facebook Messenger chatbot. Type <b>help</b>, <b>pickup</b>, <b>points</b>, <b>tips</b>, or <b>bisaya</b>.</p><div class="chat" id="ch"></div><div style="display:flex;gap:6px;margin-top:8px"><input id="bi" placeholder="Type a message" onkeydown="if(event.key=='Enter')bs()"><button class="btn" style="margin:0" onclick="bs()">Send</button></div><div class="qk">${['help','pickup','points','tips','status'].map(c=>`<button class="btn s g" onclick="$('#bi').value='${c}';bs()">${c}</button>`).join('')}</div></div>`},
+collector(){const f=window.cf||'';const L=S.reqs.filter(r=>r.status=='Pending'&&(!f||r.brgy==f));return`<div class="card"><h2>Collector view</h2><label>Filter by barangay</label><select onchange="cf=this.value;go('collector')"><option value="">All</option>${opts(BR,f)}</select></div><div class="card"><h2>Pending pickups (${L.length})</h2>${L.map(r=>`<div class="row" style="align-items:flex-start"><span><b>${esc(r.brgy)}</b> · ${esc(r.addr)}<br><span class="mu">${esc(r.name)} · ${r.types.map(t=>T[t]).join(', ')} · ~${r.kg} kg · ${esc(r.when||'any time')}</span></span><span style="display:flex;gap:4px"><input id="k${r.id}" type="number" placeholder="kg" style="width:64px"><button class="btn s" onclick="done(${r.id})">Done</button></span></div>`).join('')||'<span class="mu">No pending pickups.</span>'}</div>`},
+dash(){const A=S.logs,by=(k,keys)=>keys.map(x=>[x,A.filter(l=>l[k]==x).reduce((a,l)=>a+l.kg,0)]),bars=(d)=>{const mx=Math.max(1,...d.map(x=>x[1]));return d.map(x=>`<div class="bl"><span>${esc(x[0])}</span><div class="bar" style="width:${x[1]/mx*100}%"></div><span>${x[1].toFixed(0)}</span></div>`).join('')};
+const tot=A.reduce((a,l)=>a+l.kg,0),rec=A.filter(l=>l.type=='rec').reduce((a,l)=>a+l.kg,0),pd=S.reqs.filter(r=>r.status=='Pending').length;
+const csv='date,barangay,type,material,kg\n'+A.map(l=>[l.date,l.brgy,T[l.type],l.sub,l.kg].join(',')).join('\n');
+return`<div class="card"><h2>Barangay / ENRO dashboard</h2><p class="mu">Includes demo data to show how reports look.</p><div class="grid"><div class="stat"><b>${tot.toFixed(0)}</b><small>kg logged</small></div><div class="stat"><b>${tot?Math.round(rec/tot*100):0}%</b><small>recyclable share</small></div><div class="stat"><b>${pd}</b><small>pending pickups</small></div></div></div>
+<div class="card"><h2>Waste by type (kg)</h2>${bars(by('type',['bio','rec','res']).map(x=>[T[x[0]],x[1]]))}</div>
+<div class="card"><h2>Waste by barangay (kg)</h2>${bars(by('brgy',BR).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]))}</div>
+<div class="card"><h2>Report data (CSV)</h2><textarea rows="6" readonly onclick="this.select()">${esc(csv)}</textarea><button class="btn g" onclick="if(confirm('Reset all data to demo?')){localStorage.removeItem(KEY);location.reload()}">Reset app</button></div>`}};
+const BP={};[[120,80],[200,60],[260,110],[150,150],[90,130],[230,170],[180,100],[210,120],[140,110],[280,60],[320,140],[170,130],[110,100],[250,90],[190,190],[300,180],[200,145],[195,115],[240,140]].forEach((p,i)=>BP[BR[i]]=p);
+const LY={b:1,t:1,p:1},TP={};
+V.map=()=>`<div class="card"><h2>Live collection map: Surigao City</h2><div class="qk" style="margin:0 0 8px">${[['b','Barangays'],['t','Partner trucks'],['p','Pending pickups']].map(l=>`<label style="display:flex;gap:4px;align-items:center;margin:0"><input type="checkbox" style="width:auto" ${LY[l[0]]?'checked':''} onchange="LY.${l[0]}=this.checked;dm()">${l[1]}</label>`).join('')}</div><div id="mp"></div><p class="mu">Schematic map: barangay positions are approximate placeholders. Trucks move in simulation until a driver taps Share GPS. Tap a truck for details.</p></div>
+<div class="card"><h2>Approved partner trucks</h2>${S.cols.filter(c=>c.status=='Approved').map(c=>`<div class="row"><span><b>${esc(c.name)}</b> · ${esc(c.plate)}<br><span class="mu">${esc(c.type)} · serves ${c.brgys.map(esc).join(', ')}</span></span><button class="btn s g" onclick="gps(${c.id})">Share GPS</button></div>`).join('')||'<span class="mu">No approved partners yet.</span>'}</div>`;
+V.partners=()=>`<div class="card"><h2>Become a partner collector</h2><label>Name / business</label><input id="cn"><label>Type</label><select id="ct"><option>Independent hauler</option><option>Junk shop</option><option>Barangay MRF</option></select><label>Truck / vehicle plate</label><input id="cp"><label>Capacity (kg)</label><input id="cc" type="number" value="300"><label>Barangays served (hold Ctrl/Cmd for many)</label><select id="cb" multiple size="5">${opts(BR)}</select><button class="btn" onclick="const b=[...$('#cb').selectedOptions].map(o=>o.value);if(!$('#cn').value||!b.length)return toast('Add name and barangays');S.cols.push({id:S.next++,name:$('#cn').value.slice(0,50),type:$('#ct').value,plate:$('#cp').value.slice(0,15),brgys:b,cap:+$('#cc').value||0,status:'Pending'});save();toast('Application sent for approval');go('partners')">Apply</button></div>
+<div class="card"><h2>Admin: approve partners</h2><p class="mu">Prototype has no login. A real version restricts this to City ENRO / admin.</p>${S.cols.map(c=>`<div class="row"><span><b>${esc(c.name)}</b> · ${esc(c.plate)}<br><span class="mu">${esc(c.type)} · ${c.cap} kg · ${c.brgys.map(esc).join(', ')}</span></span><span><span class="tag ${c.status=='Pending'?'w':''}">${c.status}</span> <button class="btn s g" onclick="S.cols.find(x=>x.id==${c.id}).status='${c.status=='Approved'?'Pending':'Approved'}';save();go('partners')">${c.status=='Approved'?'Revoke':'Approve'}</button></span></div>`).join('')}</div>`;
+function dm(){const m=$('#mp');if(!m)return;const pn={};S.reqs.filter(r=>r.status=='Pending').forEach(r=>pn[r.brgy]=(pn[r.brgy]||0)+1);
+let g='<path d="M0 300V70Q60 40 130 45Q220 25 300 60Q380 90 400 150V300Z" fill="#dfe9cf"/><text x="230" y="20" font-size="9" fill="#3b6a8a">Surigao Strait</text><text x="10" y="290" font-size="8" fill="#5a6b5f">Surigao City (schematic)</text>';
+if(LY.b)g+=BR.map(b=>{const p=BP[b];return`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="${pn[b]?'#e08a1a':'#1c8748'}"/><text x="${p[0]+6}" y="${p[1]+3}" font-size="6.5" fill="#1b2a20">${b}${pn[b]?' ('+pn[b]+')':''}</text>`}).join('');
+if(LY.p)g+=S.reqs.filter(r=>r.status=='Pending').map((r,i)=>{const p=BP[r.brgy]||[200,115];return`<circle cx="${p[0]-6+i%3*3}" cy="${p[1]-8}" r="2.5" fill="#d33"/>`}).join('');
+if(LY.t)g+=S.cols.filter(c=>c.status=='Approved'&&TP[c.id]).map(c=>{const p=TP[c.id];return`<g onclick="toast('${esc(c.name)} · ${esc(c.plate)} · ${p.gps?'live GPS':'simulated'}')" style="cursor:pointer"><rect x="${p[0]-8}" y="${p[1]-5}" width="16" height="10" rx="2" fill="#1746a2"/><text x="${p[0]}" y="${p[1]+3}" font-size="6" fill="#fff" text-anchor="middle">${esc(c.plate.slice(0,3))}</text></g>`}).join('');
+m.innerHTML=`<svg viewBox="0 0 400 300" style="width:100%;border-radius:12px;background:#a9d4ee;display:block">${g}</svg>`}
+function tick(){S.cols.filter(c=>c.status=='Approved').forEach(c=>{let p=TP[c.id];if(!p){const n=c.brgys[0],b=BP[n]||[200,115];p=TP[c.id]={x:b[0],y:b[1],0:b[0],1:b[1],t:n}}
+if(p.gps)return;const t=BP[p.t]||[200,115],dx=t[0]-p[0],dy=t[1]-p[1],d=Math.hypot(dx,dy);if(d<3)p.t=c.brgys[Math.floor(Math.random()*c.brgys.length)];else{p[0]+=dx/d*3;p[1]+=dy/d*3}});if(tab=='map')dm()}
+setInterval(tick,1000);
+function gps(id){if(!navigator.geolocation)return toast('GPS not supported');navigator.geolocation.watchPosition(q=>{const x=Math.max(5,Math.min(395,(q.coords.longitude-125.40)/0.18*400)),y=Math.max(5,Math.min(295,(9.88-q.coords.latitude)/0.18*300));TP[id]={0:x,1:y,gps:1};dm()},()=>toast('Location blocked. Allow location access.'));toast('Sharing live location')}
+function done(id){const k=+$('#k'+id).value;if(!(k>0))return toast('Enter actual kg');const r=S.reqs.find(x=>x.id==id);r.status='Collected';r.actual=k;save();toast('Marked collected');go('collector')}
+function gf(){const q=$('#gq').value.toLowerCase();$('#gl').innerHTML=GUIDE.filter(g=>g[0].toLowerCase().includes(q)).map(g=>`<div class="row"><span>${g[0]}</span><span class="tag ${g[1]=='res'?'w':''}">${T[g[1]]}</span></div>`).join('')||'<span class="mu">Not found. Treat as residual and ask your barangay.</span>'}
+const NAV=[['home','Home'],['log','Log'],['pickup','Pickup'],['rewards','Rewards'],['guide','Guide'],['bot','Messenger bot'],['map','Map'],['partners','Partners'],['collector','Collector'],['dash','Dashboard']];
+$('#nav').innerHTML=NAV.map(n=>`<button data-t="${n[0]}" onclick="go('${n[0]}')">${n[1]}</button>`).join('');
+function go(t){tab=t;$('#app').innerHTML=V[t]();document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==t));if(t=='guide')gf();if(t=='map')tick();if(t=='bot'){if(!bot.msgs){bot.msgs=[];bm('b',L('hi'))}bot.msgs.forEach(m=>bd(m[0],m[1]))}window.scrollTo(0,0)}
+const I={en:{hi:'Hi! I am BasuraTrack for Surigao City. Type: pickup, points, tips, status, or bisaya.',ab:'Which barangay? (e.g. Washington, Taft, Luna)',at:'What waste? Reply with: bio, rec, res (you may send several).',aw:'When is a good time for pickup?',ok:'Done! Pickup request sent to collectors. Type status to check it.',pt:'Your points: ',nr:'No pickup requests yet. Type pickup to make one.',nb:'Barangay not found. Try again, e.g. Rizal.',un:'Sorry, I did not get that. Type help.'},
+ceb:{hi:'Kumusta! Ako si BasuraTrack sa Surigao City. I-type: pickup, points, tips, status, o english.',ab:'Unsang barangay? (pananglitan Washington, Taft, Luna)',at:'Unsa nga basura? Tubaga: bio, rec, res.',aw:'Kanus-a ang maayong oras sa pickup?',ok:'Human na! Napadala na ang pickup request sa mga collector. I-type ang status.',pt:'Imong points: ',nr:'Wala pay pickup request. I-type ang pickup.',nb:'Wala makita ang barangay. Sulayi pag-usab.',un:'Pasayloa, wala nako masabti. I-type ang help.'}};
+const L=k=>I[bot.lang][k];
+function bd(w,t){const c=$('#ch');if(!c)return;const d=document.createElement('div');d.className='m '+w;d.textContent=t;c.appendChild(d);c.scrollTop=c.scrollHeight}
+function bm(w,t){bot.msgs.push([w,t]);bd(w,t)}
+function bs(){const i=$('#bi'),t=i.value.trim();if(!t)return;i.value='';bm('u',t);setTimeout(()=>bm('b',br(t.toLowerCase())),250)}
+function br(t){if(t=='bisaya'||t=='cebuano'){bot.lang='ceb';return L('hi')}if(t=='english'){bot.lang='en';return L('hi')}
+if(t=='cancel'){bot.step=null;return 'Cancelled.'}
+if(bot.step=='b'){const b=BR.find(x=>t.includes(x.toLowerCase()));if(!b)return L('nb');bot.d.brgy=b;bot.step='t';return L('at')}
+if(bot.step=='t'){const ty=['bio','rec','res'].filter(x=>t.includes(x));if(!ty.length)return L('at');bot.d.types=ty;bot.step='w';return L('aw')}
+if(bot.step=='w'){addReq({brgy:bot.d.brgy,addr:'Via Messenger',name:S.me.name||'Messenger user',types:bot.d.types,kg:5,when:t.slice(0,60)});bot.step=null;return L('ok')}
+if(/^(hi|hello|help|kumusta)/.test(t))return L('hi');
+if(t.includes('pickup'))return(bot.step='b',L('ab'));
+if(t.includes('point'))return L('pt')+pts();
+if(t.includes('tip'))return TIPS[Math.floor(Math.random()*TIPS.length)];
+if(t.includes('status')){const r=S.reqs.filter(x=>!x.demo).pop();return r?r.brgy+': '+r.status:L('nr')}
+return L('un')}
+go('home');
+</script></body></html>
